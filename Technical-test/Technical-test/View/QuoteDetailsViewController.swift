@@ -7,6 +7,11 @@
 
 import UIKit
 
+
+protocol QuoteDetailsViewControllerDelegate: AnyObject{
+	func didUpdate(quote: Quote?)
+}
+
 class QuoteDetailsViewController: UIViewController {
     
     private var quote:Quote? = nil
@@ -18,7 +23,7 @@ class QuoteDetailsViewController: UIViewController {
     let readableLastChangePercentLabel = UILabel()
     let favoriteButton = UIButton()
     
-    
+	weak var delegate: QuoteDetailsViewControllerDelegate? /// QuoteDetailsViewControllerDelegate protocol
     
     
     init(quote:Quote) {
@@ -127,8 +132,43 @@ class QuoteDetailsViewController: UIViewController {
         ])
     }
     
+	/**
+	 Action for `favoriteButton` button press
+	 Shows a popup to ask for user's confirmation of the update
+	 
+	 */
     
     @objc func didPressFavoriteButton(_ sender:UIButton!) {
-        // TODO
+		if let quote = quote {
+			askForUserConfirmation(quote: quote)
+		}
     }
+	
+	/**
+	 Presents an UIAlertController to the user to ask for a confirmation of the favorite corresponding action
+	 */
+	func askForUserConfirmation(quote: Quote){
+		
+		let title: String = "\(quote.isFavorite ? "Removing" : "Adding" ) \(quote.name ?? "quote") \(quote.isFavorite ? "from" : "to") \(quote.myMarket?.marketName ?? "market") Favorites"
+		
+		let message: String = "Do you want to proceed?"
+		
+		DispatchQueue.main.async {
+			let alertController : UIAlertController = UIAlertController(title: title, message:  message, preferredStyle: .alert)
+			alertController.addAction(UIAlertAction(title: "Yes", style: .default, handler: { _ in
+				self.confirmUpdate()
+			}))
+			alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
+				alertController.dismiss(animated: true)
+			}))
+			self.present(alertController, animated: true)
+		}
+	}
+	/**
+	 User confirmed the favorites update
+	 */
+	func confirmUpdate(){
+		self.navigationController?.popToRootViewController(animated: true)
+		self.delegate?.didUpdate(quote: self.quote)
+	}
 }

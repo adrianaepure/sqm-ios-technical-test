@@ -7,12 +7,23 @@
 
 import Foundation
 
-struct Quote {
+/**
+ Define Quote
+ */
+struct Quote: Decodable{
     var symbol:String?
     var name:String?
     var currency:String?
     var readableLastChangePercent:String?
     var last:String?
     var variationColor:String?
-    var myMarket:Market?
+    weak var myMarket:Market?	
+	/**
+	 - Returns:
+		- `true` when the quote was added to market favorites
+		- `false` when the quote wasn't added or removed from market favorites
+	 */
+	var isFavorite: Bool{
+		return myMarket?.isQuoteInFavorites(self) ?? false
+	}
 }
